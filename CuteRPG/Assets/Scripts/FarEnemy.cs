@@ -7,7 +7,7 @@ public class FarEnemy : MonoBehaviour
     public float attackCooldown = 3f;
     public Transform player;
     public Animator animator;
-    public GameObject magicProjectile; // Префаб магического снаряда
+    public GameObject magicShoot; // Префаб магического снаряда
 
     private float lastAttackTime;
 
@@ -26,7 +26,7 @@ public class FarEnemy : MonoBehaviour
     private void Attack()
     {
         animator.SetTrigger("Attack"); // Анимация атаки
-        GameObject projectile = Instantiate(magicProjectile, transform.position, Quaternion.identity);
-        projectile.GetComponent<MagicProjectile>().SetTarget(player);
+        GameObject projectile = Instantiate(magicShoot, transform.position, Quaternion.identity);
+        projectile.GetComponent<MagicShoot>().SetTarget(player);
     }
 }

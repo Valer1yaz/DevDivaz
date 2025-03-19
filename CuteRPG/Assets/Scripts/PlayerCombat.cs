@@ -5,6 +5,10 @@ public class PlayerCombat : MonoBehaviour
     public int physicalDamage = 10;
     public int magicDamage = 15;
     public float magicCooldown = 5f;
+    public float attackRange = 2f; // Дистанция атаки
+    public LayerMask enemyLayer; // Слой для поиска врагов
+    public Animator animator;
+
     private float lastMagicAttackTime;
 
     private void Update()
@@ -25,11 +29,28 @@ public class PlayerCombat : MonoBehaviour
 
     private void PerformPhysicalAttack()
     {
-        // Логика физической атаки
+        animator.SetTrigger("Attack"); // Анимация физической атаки
+        Collider[] hitEnemies = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
+        foreach (Collider enemy in hitEnemies)
+        {
+            enemy.GetComponent<Health>().TakeDamage(physicalDamage);
+        }
     }
 
     private void PerformMagicAttack()
     {
-        // Логика магической атаки
+        animator.SetTrigger("MagicAttack"); // Анимация магической атаки
+        Collider[] hitEnemies = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
+        foreach (Collider enemy in hitEnemies)
+        {
+            enemy.GetComponent<Health>().TakeDamage(magicDamage);
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        // Визуализация радиуса атаки в редакторе
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }

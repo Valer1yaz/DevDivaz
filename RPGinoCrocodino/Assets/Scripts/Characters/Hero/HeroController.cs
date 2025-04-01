@@ -14,6 +14,9 @@ public class HeroController : MonoBehaviour
     [SerializeField] private GameObject magicProjectilePrefab;
     [SerializeField] private Transform projectileSpawnPoint;
 
+    [Header("Magic System")]
+    [SerializeField] private MagicSystem magicSystem;
+
     private CharacterController characterController;
     private Animator animator;
     private Camera mainCamera;
@@ -89,6 +92,7 @@ public class HeroController : MonoBehaviour
         animator.SetTrigger("PhysicalAttack");
 
         // Attack logic will be handled in animation event
+        // а че у тебя комменты на басятском а не на русском
     }
 
     private void MagicAttack()
@@ -98,9 +102,6 @@ public class HeroController : MonoBehaviour
         isAttacking = true;
         animator.SetTrigger("MagicAttack");
         magicSystem.ConsumeMagic(1);
-
-        // Projectile will be spawned in animation event
-    }
 
     // Called from animation event
     private void PerformPhysicalAttack()
@@ -133,4 +134,15 @@ public class HeroController : MonoBehaviour
         animator.SetFloat("Speed", movement.magnitude * (isRunning ? 2 : 1));
         animator.SetBool("IsRunning", isRunning);
     }
+
+    // Спавн через пул объектов
+    GameObject projectile = ObjectPooler.Instance.SpawnFromPool("MagicProjectile",
+        projectileSpawnPoint.position,
+        projectileSpawnPoint.rotation);
+        
+    if (projectile.TryGetComponent(out MagicProjectile magicProj))
+    {
+        magicProj.Initialize(transform.forward, GetComponent<DamageDealer>());
+    }
+}
 }

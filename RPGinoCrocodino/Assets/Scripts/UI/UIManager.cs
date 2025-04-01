@@ -21,18 +21,21 @@ public class UIManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
+            Destroy(gameObject);
         }
         else
         {
-            Destroy(gameObject);
+            Instance = this;
         }
     }
 
     public void UpdateHealthUI(int currentHealth, int maxHealth)
     {
+        //проверка на null
+        if (healthSlider == null || healthText == null) return;
+
         healthSlider.maxValue = maxHealth;
         healthSlider.value = currentHealth;
         healthText.text = $"{currentHealth}/{maxHealth}";

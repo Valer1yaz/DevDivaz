@@ -1,14 +1,3 @@
-public enum DamageType
-{
-    Physical,
-    Magic
-}
-
-public interface IDamageable
-{
-    void TakeDamage(int amount, DamageType damageType);
-}
-
 public class DamageDealer : MonoBehaviour
 {
     [SerializeField] private int damageAmount = 10;
@@ -25,7 +14,7 @@ public class DamageDealer : MonoBehaviour
                 {
                     damageable.TakeDamage(damageAmount, damageType);
 
-                    // If this is a projectile, destroy it after hitting
+                    // Если магический снаряд, уничтожить его после столкновения
                     if (GetComponent<Projectile>() != null)
                     {
                         Destroy(gameObject);

@@ -58,4 +58,13 @@ public class ObjectPooler : MonoBehaviour
 
         return objectToSpawn;
     }
+
+    // Метод возврата
+    public void ReturnToPool(string tag, GameObject obj)
+    {
+        if (!poolDictionary.ContainsKey(tag)) return;
+
+        obj.SetActive(false);
+        poolDictionary[tag].Enqueue(obj);
+    }
 }

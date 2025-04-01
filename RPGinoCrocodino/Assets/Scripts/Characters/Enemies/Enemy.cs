@@ -30,6 +30,24 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         GameObject healthBarObj = Instantiate(healthBarPrefab, healthBarPosition.position, Quaternion.identity, transform);
         healthBar = healthBarObj.GetComponent<EnemyHealthBar>();
         healthBar.Initialize(maxHealth);
+
+        //проверки
+        if (healthBarPrefab == null || healthBarPosition == null)
+        {
+            Debug.LogError("Отсутствует ссылка на HealthBar!", this);
+            return;
+        }
+
+        GameObject healthBarObj = Instantiate(healthBarPrefab,
+            healthBarPosition.position,
+            Quaternion.identity,
+            transform);
+
+        if (!healthBarObj.TryGetComponent(out healthBar))
+        {
+            Destroy(healthBarObj);
+            Debug.LogError("У префаба HealthBar отсутствует компонент EnemyHealthBar!", this);
+        }
     }
 
     protected virtual void Update()

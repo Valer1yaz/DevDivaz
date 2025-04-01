@@ -9,11 +9,13 @@ public class MagicProjectile : MonoBehaviour
     private DamageDealer damageDealer;
     private Vector3 direction;
 
-    public void Initialize(Vector3 targetDirection, DamageDealer dealer)
+    public void Initialize(DamageDealer dealer)
     {
-        direction = targetDirection.normalized;
         damageDealer = dealer;
-        Destroy(gameObject, lifetime);
+        GetComponent<Rigidbody>().velocity = transform.forward * speed;
+
+        // Автоматическое уничтожение через пул
+        Invoke("ReturnToPool", lifetime);
     }
 
     private void Update()
@@ -29,6 +31,11 @@ public class MagicProjectile : MonoBehaviour
             PlayImpactEffect();
             Destroy(gameObject);
         }
+    }
+
+    private void ReturnToPool()
+    {
+        ObjectPooler.Instance.ReturnToPool("MagicProjectile", gameObject);
     }
 
     private void PlayImpactEffect()

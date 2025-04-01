@@ -16,6 +16,7 @@ public class HeroStats : MonoBehaviour, IDamageable
     private int currentHealth;
     private float hitStunTimer;
     private bool isDead;
+    private Animator animator;
 
     public int CurrentHealth => currentHealth;
     public int MaxHealth => maxHealth;
@@ -23,6 +24,7 @@ public class HeroStats : MonoBehaviour, IDamageable
 
     private void Awake()
     {
+        animator = GetComponent<Animator>();
         currentHealth = maxHealth;
     }
 
@@ -41,19 +43,21 @@ public class HeroStats : MonoBehaviour, IDamageable
         currentHealth -= amount;
         hitStunTimer = hitStunDuration;
 
-        // Apply knockback
+        // Включить отдачу от урона
         Vector3 knockbackDirection = (transform.position - damageSource.position).normalized;
         knockbackDirection.y = 0;
         GetComponent<CharacterController>().Move(knockbackDirection * knockbackForce * Time.deltaTime);
 
-        // Play effects
+        // Включить эффект
         if (hitEffect != null)
         {
             hitEffect.Play();
         }
 
-        // Update UI
-        UIManager.Instance.UpdateHealthUI(currentHealth, maxHealth);
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateHealthUI(currentHealth, maxHealth);
+        }
 
         if (currentHealth <= 0)
         {

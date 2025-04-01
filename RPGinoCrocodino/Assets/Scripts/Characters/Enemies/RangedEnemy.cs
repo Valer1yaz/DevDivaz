@@ -15,12 +15,12 @@ public class RangedEnemy : Enemy
 
         if (distanceToPlayer < fleeDistance)
         {
-            // Flee from player if too close
+            // Отойти от игрока если он слишком близко
             direction = (transform.position - player.position).normalized;
         }
         else
         {
-            // Move towards player but keep distance
+            // Подойти к игроку сохраняя дистанцию
             direction = (player.position - transform.position).normalized;
         }
 
@@ -39,15 +39,19 @@ public class RangedEnemy : Enemy
             animator.SetTrigger("Attack");
             attackTimer = attackCooldown;
 
-            // Projectile will be spawned via animation event
+            // Снаряд появляется через событие анимации
         }
     }
 
-    // Called from animation event
+    // Используем пул объектов
     private void ShootProjectile()
     {
-        if (player == null) return;
+        GameObject projectile = ObjectPooler.Instance.SpawnFromPool("EnemyProjectile",
+            projectileSpawnPoint.position,
+            Quaternion.LookRotation(player.position - projectileSpawnPoint.position));
 
-        Instantiate(projectilePrefab, projectileSpawnPoint.position, Quaternion.LookRotation(player.position - projectileSpawnPoint.position));
+        if (projectile.TryGetComponent(out EnemyProjectile proj))
+        {
+            proj.Initialize(GetComponent<DamageDealer>());
+        }
     }
-}

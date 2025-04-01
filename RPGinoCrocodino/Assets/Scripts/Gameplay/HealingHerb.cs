@@ -1,3 +1,6 @@
+using UnityEngine;
+using System.Collections;
+
 public class HealingHerb : MonoBehaviour
 {
     [SerializeField] private int healAmount = 20;

@@ -55,3 +55,4 @@ public class RangedEnemy : Enemy
             proj.Initialize(GetComponent<DamageDealer>());
         }
     }
+}

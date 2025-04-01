@@ -1,5 +1,6 @@
 using UnityEngine;
 
+
 public class MagicProjectile : MonoBehaviour
 {
     [SerializeField] private float speed = 10f;
@@ -9,7 +10,7 @@ public class MagicProjectile : MonoBehaviour
     private DamageDealer damageDealer;
     private Vector3 direction;
 
-    public void Initialize(DamageDealer dealer)
+    public void Initialize(Vector3 direction, DamageDealer dealer)
     {
         damageDealer = dealer;
         GetComponent<Rigidbody>().velocity = transform.forward * speed;
@@ -25,11 +26,18 @@ public class MagicProjectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy") || other.CompareTag("Player"))
+        if (damageDealer != null)
         {
-            damageDealer.HandleImpact(other);
+            if (other.TryGetComponent(out IDamageable damageable))
+            {
+                damageable.TakeDamage(
+                    damageDealer.DamageAmount,
+                    damageDealer.DamageType,
+                    transform
+                );
+            }
             PlayImpactEffect();
-            Destroy(gameObject);
+            ReturnToPool();
         }
     }
 

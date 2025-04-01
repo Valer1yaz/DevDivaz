@@ -36,28 +36,34 @@ public class HeroStats : MonoBehaviour, IDamageable
         }
     }
 
-    public void TakeDamage(int amount, DamageType damageType)
+    public void TakeDamage(int amount, DamageType damageType, Transform damageSource = null)
     {
         if (isDead) return;
 
         currentHealth -= amount;
         hitStunTimer = hitStunDuration;
 
-        // Включить отдачу от урона
-        Vector3 knockbackDirection = (transform.position - damageSource.position).normalized;
-        knockbackDirection.y = 0;
-        GetComponent<CharacterController>().Move(knockbackDirection * knockbackForce * Time.deltaTime);
+        // Расчет направления отбрасывания
+        Vector3 knockbackDirection = damageSource != null
+            ? (transform.position - damageSource.position).normalized
+            : -transform.forward;
 
-        // Включить эффект
+        knockbackDirection.y = 0;
+
+        // Применение отбрасывания
+        if (TryGetComponent<CharacterController>(out var controller))
+        {
+            controller.Move(knockbackDirection * knockbackForce * Time.deltaTime);
+        }
+
+        // Визуальные эффекты
         if (hitEffect != null)
         {
             hitEffect.Play();
         }
 
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.UpdateHealthUI(currentHealth, maxHealth);
-        }
+        // Обновление UI
+        UIManager.Instance?.UpdateHealthUI(currentHealth, maxHealth);
 
         if (currentHealth <= 0)
         {

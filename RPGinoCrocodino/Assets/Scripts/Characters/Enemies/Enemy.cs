@@ -26,27 +26,24 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         player = GameObject.FindGameObjectWithTag("Player").transform;
         currentHealth = maxHealth;
 
-        // Instantiate health bar
-        GameObject healthBarObj = Instantiate(healthBarPrefab, healthBarPosition.position, Quaternion.identity, transform);
-        healthBar = healthBarObj.GetComponent<EnemyHealthBar>();
-        healthBar.Initialize(maxHealth);
-
-        //проверки
-        if (healthBarPrefab == null || healthBarPosition == null)
+        // Исправленная инициализация healthBar
+        if (healthBarPrefab != null && healthBarPosition != null)
         {
-            Debug.LogError("Отсутствует ссылка на HealthBar!", this);
-            return;
+            GameObject healthBarObj = Instantiate(healthBarPrefab,
+                healthBarPosition.position,
+                Quaternion.identity,
+                transform);
+
+            healthBar = healthBarObj.GetComponent<EnemyHealthBar>();
+            if (healthBar == null)
+            {
+                Debug.LogError("EnemyHealthBar component missing on health bar prefab", this);
+                Destroy(healthBarObj);
+            }
         }
-
-        GameObject healthBarObj = Instantiate(healthBarPrefab,
-            healthBarPosition.position,
-            Quaternion.identity,
-            transform);
-
-        if (!healthBarObj.TryGetComponent(out healthBar))
+        else
         {
-            Destroy(healthBarObj);
-            Debug.LogError("У префаба HealthBar отсутствует компонент EnemyHealthBar!", this);
+            Debug.LogError("Health bar references not set in Enemy", this);
         }
     }
 
@@ -70,17 +67,43 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         }
     }
 
+    private void LateUpdate()
+    {
+        if (healthBar != null && Camera.main != null)
+        {
+            healthBar.transform.position = healthBarPosition.position;
+            healthBar.transform.rotation = Camera.main.transform.rotation;
+        }
+    }
+
     protected abstract void MoveTowardsPlayer();
     protected abstract void Attack();
 
-    public virtual void TakeDamage(int amount, DamageType damageType)
+    public void TakeDamage(int amount, DamageType damageType, Transform damageSource = null)
     {
         if (isDead) return;
 
         currentHealth -= amount;
-        healthBar.UpdateHealth(currentHealth);
 
+        if (healthBar != null)
+        {
+            healthBar.UpdateHealth(currentHealth);
+        }
+
+        // Анимация получения урона
         animator.SetTrigger("Hit");
+
+        // Отбрасывание от источника повреждений
+        if (damageSource != null)
+        {
+            Vector3 knockbackDirection = (transform.position - damageSource.position).normalized;
+            knockbackDirection.y = 0;
+
+            if (TryGetComponent<CharacterController>(out var controller))
+            {
+                controller.Move(knockbackDirection * 0.5f * Time.deltaTime);
+            }
+        }
 
         if (currentHealth <= 0)
         {
@@ -92,7 +115,12 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     {
         isDead = true;
         animator.SetTrigger("Die");
+
+        if (healthBar != null)
+        {
+            healthBar.gameObject.SetActive(false);
+        }
+
         Destroy(gameObject, 3f);
-        healthBar.gameObject.SetActive(false);
     }
 }

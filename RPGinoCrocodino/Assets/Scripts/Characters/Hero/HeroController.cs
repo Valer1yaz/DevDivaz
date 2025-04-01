@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController), typeof(Animator))]
 public class HeroController : MonoBehaviour
@@ -9,10 +10,13 @@ public class HeroController : MonoBehaviour
     [SerializeField] private float rotationSpeed = 10f;
 
     [Header("Combat")]
-    [SerializeField] private Transform attackPoint;
-    [SerializeField] private float physicalAttackRange = 1.5f;
+    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] public Transform attackPoint;
+    [SerializeField] public float physicalAttackRange = 1.5f;
     [SerializeField] private GameObject magicProjectilePrefab;
     [SerializeField] private Transform projectileSpawnPoint;
+    [SerializeField] private int physicalDamage = 20; // Добавляем это поле
+    [SerializeField] private int magicDamage = 30;
 
     [Header("Magic System")]
     [SerializeField] private MagicSystem magicSystem;
@@ -23,12 +27,14 @@ public class HeroController : MonoBehaviour
     private Vector3 movement;
     private bool isRunning;
     private bool isAttacking;
+    private HeroStats heroStats;
 
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         mainCamera = Camera.main;
+        heroStats = GetComponent<HeroStats>();
     }
 
     private void Update()
@@ -41,7 +47,7 @@ public class HeroController : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (IsInHitStun()) return;
+        if (heroStats != null && heroStats.IsInHitStun()) return;
 
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
@@ -102,28 +108,52 @@ public class HeroController : MonoBehaviour
         isAttacking = true;
         animator.SetTrigger("MagicAttack");
         magicSystem.ConsumeMagic(1);
+    }
 
-    // Called from animation event
+    // Вызывается анимацией
     private void PerformPhysicalAttack()
     {
-        Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, physicalAttackRange, enemyLayer);
+        if (attackPoint == null) return;
+
+        Collider[] hitEnemies = Physics.OverlapSphere(
+            attackPoint.position,
+            physicalAttackRange,
+            enemyLayer
+        );
 
         foreach (Collider enemy in hitEnemies)
         {
             if (enemy.TryGetComponent(out IDamageable damageable))
             {
-                damageable.TakeDamage(physicalDamage, DamageType.Physical);
+                damageable.TakeDamage(
+                    physicalDamage,
+                    DamageType.Physical,
+                    transform
+                );
             }
         }
     }
 
-    // Called from animation event
     private void SpawnMagicProjectile()
     {
-        Instantiate(magicProjectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
+        if (magicSystem == null || !magicSystem.HasEnoughMagic()) return;
+
+        GameObject projectile = Instantiate(
+            magicProjectilePrefab,
+            projectileSpawnPoint.position,
+            projectileSpawnPoint.rotation
+        );
+
+        if (projectile.TryGetComponent(out MagicProjectile proj))
+        {
+            proj.Initialize(
+                transform.forward,
+                GetComponent<DamageDealer>()
+            );
+            magicSystem.ConsumeMagic(1);
+        }
     }
 
-    // Called from animation event
     private void EndAttack()
     {
         isAttacking = false;
@@ -135,14 +165,4 @@ public class HeroController : MonoBehaviour
         animator.SetBool("IsRunning", isRunning);
     }
 
-    // Спавн через пул объектов
-    GameObject projectile = ObjectPooler.Instance.SpawnFromPool("MagicProjectile",
-        projectileSpawnPoint.position,
-        projectileSpawnPoint.rotation);
-        
-    if (projectile.TryGetComponent(out MagicProjectile magicProj))
-    {
-        magicProj.Initialize(transform.forward, GetComponent<DamageDealer>());
-    }
-}
 }

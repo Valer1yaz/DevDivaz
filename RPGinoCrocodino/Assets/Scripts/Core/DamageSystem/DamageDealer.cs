@@ -1,8 +1,13 @@
+using UnityEngine;
+
 public class DamageDealer : MonoBehaviour
 {
     [SerializeField] private int damageAmount = 10;
     [SerializeField] private DamageType damageType;
     [SerializeField] private string[] targetTags = { "Enemy", "Player" };
+
+    public int DamageAmount => damageAmount;
+    public DamageType DamageType => damageType;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -12,10 +17,10 @@ public class DamageDealer : MonoBehaviour
             {
                 if (other.TryGetComponent(out IDamageable damageable))
                 {
-                    damageable.TakeDamage(damageAmount, damageType);
+                    // “еперь передаем три параметра
+                    damageable.TakeDamage(damageAmount, damageType, transform);
 
-                    // ≈сли магический снар€д, уничтожить его после столкновени€
-                    if (GetComponent<Projectile>() != null)
+                    if (TryGetComponent<IProjectile>(out _))
                     {
                         Destroy(gameObject);
                     }

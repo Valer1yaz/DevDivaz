@@ -6,7 +6,7 @@ public class Health : MonoBehaviour
 {
     [SerializeField] public float maxHP = 100;
     [SerializeField] public float currentHP;
-    [SerializeField] private float knockbackForce = 5f;
+    [SerializeField] private float knockbackForce = 2f;
 
     // Публичное свойство для проверки смерти
     public bool IsDead { get; private set; }
@@ -24,16 +24,19 @@ public class Health : MonoBehaviour
         if (IsDead) return;
 
         currentHP -= damage;
-        animator.SetTrigger("Hurt");
 
-        // Отбрасывание
+        // Если это игрок - обновляем UI
+        if (CompareTag("Player"))
+        {
+            UIManager.Instance.UpdateHealthUI(currentHP, maxHP);
+            animator.SetTrigger("Hurt");
+        }
+
+        // Отбрасывание (для игрока и мобов)
         Vector3 knockbackDirection = -transform.forward * knockbackForce;
         transform.position += knockbackDirection;
 
-        if (currentHP <= 0)
-        {
-            Die();
-        }
+        if (currentHP <= 0) Die();
     }
 
     private void Die()

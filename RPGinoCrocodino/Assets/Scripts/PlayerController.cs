@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -7,20 +8,23 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private float runSpeed = 10f;
-    [SerializeField] private float rotationSpeed = 4f;
+    [SerializeField] private float mouseSensitivity = 2f; // Чувствительность мыши
     [SerializeField] private Transform cameraTransform;
 
     private CharacterController controller;
     private Vector2 inputDirection;
     private Vector3 moveDirection;
     private bool isRunning;
+    private float verticalVelocity;
+    private float rotationX; // Угол поворота камеры по вертикали
 
     [Header("Combat")]
     [SerializeField] private Transform attackPoint;
-    [SerializeField] private float attackRange = 1f;
+    [SerializeField] private float attackRange = 2f;
     [SerializeField] private LayerMask enemyLayers;
-    [SerializeField] private GameObject magicProjectilePrefab;
-    [SerializeField] private Transform magicSpawnPoint;
+    [SerializeField] private GameObject magicAOEEffect; //для добавления спецэффекта
+    [SerializeField] public float magicAttackRadius = 5f; // Новый параметр радиуса
+    [SerializeField] public float magicDamage = 15f;
 
     private Animator animator;
     private Health health;
@@ -33,50 +37,56 @@ public class PlayerController : MonoBehaviour
         health = GetComponent<Health>();
         magicSystem = GetComponent<MagicSystem>();
 
-        if (cameraTransform == null)
-            cameraTransform = Camera.main.transform;
+        // Скрыть и зафиксировать курсор
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void Update()
     {
+        HandleRotation();
         HandleMovement();
         HandleCombat();
     }
 
+    private void HandleRotation()
+    {
+        // Поворот персонажа и камеры от мыши
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+
+        // Поворот персонажа по горизонтали
+        transform.Rotate(0, mouseX, 0);
+
+        // Поворот камеры по вертикали (опционально)
+        rotationX -= mouseY;
+        rotationX = Mathf.Clamp(rotationX, -30f, 30f); // Ограничение угла
+        cameraTransform.localRotation = Quaternion.Euler(rotationX, 0, 0);
+    }
     private void HandleMovement()
     {
-        // Получение ввода
-        float horizontal = Input.GetAxis("Horizontal");
+        // Движение вперед/назад (W/S)
         float vertical = Input.GetAxis("Vertical");
-        inputDirection = new Vector2(horizontal, vertical);
         isRunning = Input.GetKey(KeyCode.LeftShift);
 
-        // Поворот персонажа в сторону камеры (только по оси Y)
-        Vector3 cameraFlatDirection = new Vector3(cameraTransform.forward.x, 0, cameraTransform.forward.z).normalized;
-        Quaternion targetRotation = Quaternion.LookRotation(cameraFlatDirection);
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            targetRotation,
-            rotationSpeed * Time.deltaTime
-        );
-
-        // Расчет движения относительно камеры
-        Vector3 moveRelativeToCamera =
-            cameraTransform.forward * inputDirection.y +
-            cameraTransform.right * inputDirection.x;
-
-        moveRelativeToCamera.y = 0; // Игнорируем вертикальную составляющую
-        moveRelativeToCamera.Normalize();
+        // Направление движения всегда вперед относительно персонажа
+        Vector3 move = transform.forward * vertical;
 
         // Применение скорости
         float currentSpeed = isRunning ? runSpeed : walkSpeed;
-        moveDirection = moveRelativeToCamera * currentSpeed;
+        moveDirection = move * currentSpeed;
 
-        // Движение и гравитация
-        controller.Move(moveDirection * Time.deltaTime +
-                       Vector3.up * Physics.gravity.y * Time.deltaTime);
+        // Гравитация
+        verticalVelocity += Physics.gravity.y * Time.deltaTime;
+        if (controller.isGrounded && verticalVelocity < 0)
+            verticalVelocity = -2f;
 
-        // Обновление анимации
+        // Движение
+        controller.Move(
+            (moveDirection + Vector3.up * verticalVelocity) * Time.deltaTime
+        );
+
+        // Анимация движения
         animator.SetFloat("Speed", moveDirection.magnitude / runSpeed);
     }
 
@@ -92,9 +102,44 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetTrigger("MagicAttack");
             magicSystem.UseMagic();
-            Instantiate(magicProjectilePrefab, magicSpawnPoint.position, transform.rotation);
+            MagicalAOEAttack(); // Заменяем выстрел на AOE
         }
     }
+
+    private void MagicalAOEAttack()
+    {
+        var effect = Instantiate(magicAOEEffect, transform.position, Quaternion.identity);
+        Collider[] hitEnemies = Physics.OverlapSphere(
+            transform.position, // Центр атаки - сам игрок
+            magicAttackRadius,
+            enemyLayers
+        );
+
+        foreach (Collider enemy in hitEnemies)
+        {
+            StartCoroutine(ApplyDamageOverTime(enemy, 3, 1f));
+        }
+
+        Destroy(effect, 2f);
+    }
+    private IEnumerator ApplyDamageOverTime(Collider enemy, int ticks, float interval)
+    {
+        Health enemyHealth = enemy.GetComponent<Health>();
+        if (enemyHealth == null) yield break;
+
+        for (int i = 0; i < ticks; i++)
+        {
+            enemyHealth.TakeDamage(magicDamage / ticks, DamageType.Magic);
+            yield return new WaitForSeconds(interval);
+        }
+    }
+
+    // Визуализация радиуса в редакторе
+    private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(transform.position, magicAttackRadius);
+        }
 
     private void PhysicalAttack()
     {

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public enum EnemyType { Melee, Ranged }
 
@@ -10,11 +11,18 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private float attackRange = 2f;
     [SerializeField] private float attackCooldown = 2f;
     [SerializeField] private int damage = 10;
+    [SerializeField] private ParticleSystem deathEffect;
 
     [Header("Ranged Attack")]
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform projectileSpawnPoint;
     [SerializeField] private float projectileSpeed = 10f;
+    [SerializeField] private ParticleSystem castEffect; // Эффект заряда
+
+    [Header("Melee Attack")]
+    [SerializeField] private float meleeDamageRadius = 1.5f; // Радиус ближней атаки
+    [SerializeField] private LayerMask playerLayer; // Слой игрока
+
 
     private Transform player;
     private Animator animator;
@@ -34,38 +42,36 @@ public class EnemyAI : MonoBehaviour
         if (isDead || health.IsDead) return;
 
         float distance = Vector3.Distance(transform.position, player.position);
+        HandleRotation();
+        HandleCombat(distance);
+    }
 
-        // Поворот к игроку
+    private void HandleRotation()
+    {
         Vector3 direction = (player.position - transform.position).normalized;
         Quaternion targetRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRotation,
+            10f * Time.deltaTime
+        );
+    }
 
-        // Логика атаки
+    private void HandleCombat(float distance)
+    {
         if (enemyType == EnemyType.Melee)
         {
-            if (distance <= attackRange)
-            {
-                Attack();
-            }
-            else
-            {
-                ChasePlayer();
-            }
+            if (distance <= attackRange) Attack();
+            else ChasePlayer();
         }
         else if (enemyType == EnemyType.Ranged)
         {
-            if (distance <= 10f && distance >= 5f)
-            {
+            if (distance <= 20f && distance >= 5f) {
+                animator.SetBool("IsMoving", false);
                 Attack();
             }
-            else if (distance < 5f)
-            {
-                Retreat();
-            }
-            else
-            {
-                ChasePlayer();
-            }
+            else if (distance < 5f) Retreat();
+            else ChasePlayer();
         }
     }
 
@@ -90,35 +96,63 @@ public class EnemyAI : MonoBehaviour
         {
             animator.SetTrigger("Attack");
 
-            if (enemyType == EnemyType.Melee)
+            if (enemyType == EnemyType.Ranged)
             {
-                // Ближняя атака
-                if (Vector3.Distance(transform.position, player.position) <= attackRange)
-                {
-                    player.GetComponent<Health>().TakeDamage(damage, DamageType.Physical);
-                }
+                StartCoroutine(RangedAttackSequence());
             }
-            else if (enemyType == EnemyType.Ranged)
+            else if (enemyType == EnemyType.Melee)
             {
-                // Создание снаряда
-                GameObject projectile = Instantiate(
-                    projectilePrefab,
-                    projectileSpawnPoint.position,
-                    Quaternion.identity
+                // Поиск игрока в радиусе атаки
+                Collider[] hitPlayers = Physics.OverlapSphere(
+                    transform.position,
+                    meleeDamageRadius,
+                    playerLayer
                 );
-                projectile.GetComponent<Rigidbody>().velocity =
-                    (player.position - projectileSpawnPoint.position).normalized * projectileSpeed;
-                projectile.GetComponent<Projectile>().SetDamage(damage);
+
+                foreach (Collider player in hitPlayers)
+                {
+                    if (player.CompareTag("Player"))
+                    {
+                        player.GetComponent<Health>().TakeDamage(damage, DamageType.Physical);
+                    }
+                }
             }
 
             cooldownTimer = 0f;
         }
     }
 
+    private IEnumerator RangedAttackSequence()
+    {
+        // Эффект заряда
+        if (castEffect != null) castEffect.Play();
+
+        // Задержка перед выстрелом (синхронизация с анимацией)
+        yield return new WaitForSeconds(1f);
+
+        // Создание снаряда
+        GameObject projectile = Instantiate(
+            projectilePrefab,
+            projectileSpawnPoint.position,
+            Quaternion.LookRotation(player.position - projectileSpawnPoint.position)
+        );
+
+        // Настройка снаряда
+        Projectile projectileScript = projectile.GetComponent<Projectile>();
+        projectileScript.Initialize(
+            damage,
+            DamageType.Magic,
+            projectileSpeed,
+            player.position + Vector3.up * 1f // Цель: центр игрока
+        );
+        Destroy(projectile, 5f);
+    }
+
     public void OnDeath()
     {
         isDead = true;
-        animator.SetTrigger("Die");
+        // Эффект заряда
+        if (deathEffect != null) deathEffect.Play();
         Destroy(GetComponent<EnemyAI>());
         Destroy(gameObject, 3f);
     }

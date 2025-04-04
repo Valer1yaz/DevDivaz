@@ -13,7 +13,18 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_Text magicText;
     [SerializeField] private GameObject deathScreen;
 
+    private bool isDeathScreenActive = false;
+
     private void Awake() => Instance = this;
+
+    private void Update()
+    {
+        // Если экран смерти активен и нажата любая клавиша
+        if (isDeathScreenActive && Input.anyKeyDown)
+        {
+            ReloadScene();
+        }
+    }
 
     public void UpdateHealthUI(float currentHP, float maxHP)
     {
@@ -26,7 +37,16 @@ public class UIManager : MonoBehaviour
         magicSlider.value = (float)charges / maxCharges;
         magicText.text = $"{charges}/{maxCharges}";
     }
-    public void ShowDeathScreen() => deathScreen.SetActive(true);
+
+    public void ShowDeathScreen()
+    {
+        deathScreen.SetActive(true);
+        isDeathScreenActive = true;
+
+        // Разблокируем курсор
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
 
     public void ReloadScene() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 }

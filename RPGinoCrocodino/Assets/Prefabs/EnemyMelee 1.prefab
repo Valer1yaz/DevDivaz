@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4935346414363838166}
   - component: {fileID: 4268207685263794643}
   - component: {fileID: 3535813073580526211}
-  - component: {fileID: 2660610414503128420}
+  - component: {fileID: 1395909066331668404}
   m_Layer: 6
   m_Name: EnemyMelee 1
   m_TagString: Enemy
@@ -108,8 +108,8 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!143 &2660610414503128420
-CharacterController:
+--- !u!136 &1395909066331668404
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -126,14 +126,11 @@ CharacterController:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 1.8
-  m_Radius: 0.5
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 1.1, z: 0}
+  serializedVersion: 2
+  m_Radius: 0.291079
+  m_Height: 1.9
+  m_Direction: 1
+  m_Center: {x: -0.0001450479, y: 0.96512526, z: 0}
 --- !u!1001 &1366526316694440723
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -4,7 +4,7 @@ public class MagicSystem : MonoBehaviour
 {
     [SerializeField] public int maxCharges = 5;
     [SerializeField] public float rechargeTime = 5f;
-    private int currentCharges;
+    public int currentCharges;
     private float rechargeTimer;
 
     private void Start()

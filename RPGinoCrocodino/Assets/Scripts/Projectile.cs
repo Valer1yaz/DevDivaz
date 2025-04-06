@@ -20,12 +20,17 @@ public class Projectile : MonoBehaviour
     {
         Vector3 moveDirection = (targetPosition - transform.position).normalized;
         transform.position += moveDirection * speed * Time.deltaTime;
-
+        if (impactEffect != null)
+        {
+            var effect = Instantiate(impactEffect, transform.position, Quaternion.identity);
+            Destroy(effect, 5f);
+        }
         // Автоуничтожение при промахе
         if (Vector3.Distance(transform.position, targetPosition) < 0.5f)
         {
             Destroy(gameObject, 5f);
         }
+        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -33,12 +38,7 @@ public class Projectile : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             other.GetComponent<Health>().TakeDamage(damage, damageType);
-            if (impactEffect != null)
-            {
-                var effect = Instantiate(impactEffect, transform.position, Quaternion.identity);
-                Destroy(effect, 5f);
-            }
-
+            Destroy(gameObject);
         }
     }
 }

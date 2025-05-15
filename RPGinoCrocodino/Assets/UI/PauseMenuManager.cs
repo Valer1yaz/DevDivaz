@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -73,29 +74,33 @@ public class PauseMenuManager : MonoBehaviour
 
     public void SaveGame()
     {
-        var player = FindObjectOfType<PlayerController>();
-        if (player != null)
-        {
-            SaveSystem.SaveGame(player);
-            Debug.Log("Game saved");
-        }
-        else
-        {
-            Debug.LogWarning("PlayerController не найден");
-        }
+        // Перед сохранением отключаем игрока, чтобы избежать ошибок
+        if (playerController != null)
+            playerController.enabled = false;
+
+        // Вызов системы сохранения
+        SaveSystemManager.Instance.SaveGame();
+
+        // После сохранения включаем игрока обратно, если нужно
+        if (playerController != null)
+            playerController.enabled = true;
+
+        Debug.Log("Игра сохранена");
     }
 
     public void LoadGame()
     {
-        var player = FindObjectOfType<PlayerController>();
-        if (player != null)
-        {
-            SaveSystem.LoadGame(player);
-            Debug.Log("Game loaded");
-        }
-        else
-        {
-            Debug.LogWarning("PlayerController не найден");
-        }
+        // Перед загрузкой отключаем игрока
+        if (playerController != null)
+            playerController.enabled = false;
+
+        // Вызов системы загрузки
+        SaveSystemManager.Instance.LoadGame();
+
+        // После загрузки включаем игрока
+        if (playerController != null)
+            playerController.enabled = true;
+
+        Debug.Log("Игра загружена");
     }
 }

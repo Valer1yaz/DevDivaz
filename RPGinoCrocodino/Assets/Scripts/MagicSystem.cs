@@ -10,6 +10,7 @@ public class MagicSystem : MonoBehaviour
     private void Start()
     {
         currentCharges = maxCharges;
+        UIManager.Instance.UpdateMagicUI(currentCharges, maxCharges);
     }
 
     private void Update()
@@ -23,6 +24,16 @@ public class MagicSystem : MonoBehaviour
                 rechargeTimer = 0f;
                 UIManager.Instance.UpdateMagicUI(currentCharges, maxCharges);
             }
+        }
+    }
+
+    public int CurrentCharges
+    {
+        get => currentCharges;
+        set
+        {
+            currentCharges = Mathf.Clamp(value, 0, maxCharges);
+            UIManager.Instance.UpdateMagicUI(currentCharges, maxCharges);
         }
     }
 

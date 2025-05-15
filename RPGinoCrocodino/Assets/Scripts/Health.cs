@@ -19,6 +19,23 @@ public class Health : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
+    public float CurrentHealth
+    {
+        get => currentHP;
+        set
+        {
+            currentHP = Mathf.Clamp(value, 0, maxHP);
+            if (CompareTag("Player"))
+            {
+                UIManager.Instance.UpdateHealthUI(currentHP, maxHP);
+            }
+            if (currentHP <= 0 && !IsDead)
+            {
+                Die();
+            }
+        }
+    }
+
     public void TakeDamage(float damage, DamageType type)
     {
         if (IsDead) return;

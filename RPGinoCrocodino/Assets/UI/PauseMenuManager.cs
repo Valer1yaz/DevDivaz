@@ -79,7 +79,8 @@ public class PauseMenuManager : MonoBehaviour
             playerController.enabled = false;
 
         // Вызов системы сохранения
-        SaveSystemManager.Instance.SaveGame();
+        var player = FindObjectOfType<PlayerController>();
+        SaveSystemManager.Instance.SaveGame(player);
 
         // После сохранения включаем игрока обратно, если нужно
         if (playerController != null)
@@ -95,7 +96,8 @@ public class PauseMenuManager : MonoBehaviour
             playerController.enabled = false;
 
         // Вызов системы загрузки
-        SaveSystemManager.Instance.LoadGame();
+        PlayerController player = FindObjectOfType<PlayerController>();
+        SaveSystemManager.Instance.LoadGame(player);
 
         // После загрузки включаем игрока
         if (playerController != null)

@@ -8,43 +8,39 @@ public class SaveSystemManager : MonoBehaviour
     private GameDataInteractor interactor;
 
     [SerializeField] private PlayerController player;
-    [SerializeField] private List<GameObject> enemies;
 
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance != null)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        // Получаем интерктор из Bootstrapper
+        if (GameBootstrapper.Instance != null)
+        {
+            interactor = GameBootstrapper.Instance.GameInteractor;
         }
         else
         {
-            Destroy(gameObject);
+            Debug.LogError("GameBootstrapper не найден!");
         }
-
-        // создаем репозиторий и интерктор
-        IGameDataRepository repository = new JsonGameDataRepository();
-        interactor = new GameDataInteractor(repository);
     }
 
-    public void SaveGame()
+    public void SaveGame(PlayerController player)
     {
-        // собираем врагов если не заданы
-        if (enemies == null || enemies.Count == 0)
-        {
-            enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
-        }
+        // Получить врагов в сцене
+        var enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
         interactor.SaveGame(player, enemies);
         Debug.Log("Игра сохранена");
     }
 
-    public void LoadGame()
+    public void LoadGame(PlayerController player)
     {
-        // собираем врагов
-        if (enemies == null || enemies.Count == 0)
-        {
-            enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
-        }
+        var enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
         interactor.LoadGame(player, enemies);
         Debug.Log("Игра загружена");
     }

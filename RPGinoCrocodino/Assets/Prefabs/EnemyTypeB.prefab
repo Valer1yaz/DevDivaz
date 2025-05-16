@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3535813073580526211}
   - component: {fileID: 1395909066331668404}
   m_Layer: 6
-  m_Name: EnemyMelee 1
+  m_Name: EnemyTypeB
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -67,6 +67,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxCharges: 5
   rechargeTime: 5
+  currentCharges: 0
 --- !u!114 &4268207685263794643
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,9 +85,15 @@ MonoBehaviour:
   attackRange: 2
   attackCooldown: 2
   damage: 10
-  projectilePrefab: {fileID: 0}
+  deathEffect: {fileID: 6855314210357232282, guid: 7c2a9b83b809a0848915fabd9596b68b, type: 3}
+  projectilePrefab: {fileID: 5099504310651994328, guid: e9ca9a7b7cdb5594395dd79999832a5f, type: 3}
   projectileSpawnPoint: {fileID: 9145303853813013776}
   projectileSpeed: 10
+  castEffect: {fileID: 0}
+  meleeDamageRadius: 1.5
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &3535813073580526211
 Animator:
   serializedVersion: 5

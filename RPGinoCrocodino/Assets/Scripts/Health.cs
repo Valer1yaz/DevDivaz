@@ -25,7 +25,7 @@ public class Health : MonoBehaviour
         set
         {
             currentHP = Mathf.Clamp(value, 0, maxHP);
-            if (CompareTag("Player"))
+            if (CompareTag("Player") && UIManager.Instance != null)
             {
                 UIManager.Instance.UpdateHealthUI(currentHP, maxHP);
             }
@@ -46,7 +46,10 @@ public class Health : MonoBehaviour
         if (CompareTag("Player"))
         {
             UIManager.Instance.UpdateHealthUI(currentHP, maxHP);
-            animator.SetTrigger("Hurt");
+            if (animator != null)
+            {
+                animator.SetTrigger("Hurt");
+            }
         }
 
         // Отбрасывание (для игрока и мобов)
@@ -59,10 +62,14 @@ public class Health : MonoBehaviour
     private void Die()
     {
         IsDead = true; // Устанавливаем флаг смерти
-        animator.SetTrigger("Die");
+        if (animator != null)
+        {
+            animator.SetTrigger("Die");
+        }
         if (CompareTag("Player"))
         {
-            UIManager.Instance.ShowDeathScreen();
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowDeathScreen();
         }
         else
         {

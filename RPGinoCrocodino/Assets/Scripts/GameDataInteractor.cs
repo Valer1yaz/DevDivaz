@@ -75,6 +75,7 @@ public class GameDataInteractor
         var playerHealth = player.GetComponent<Health>();
         var playerMagic = player.GetComponent<MagicSystem>();
         player.transform.position = data.Player.Position;
+        Debug.Log("Позиция игрока после установки: " + player.transform.position);
         playerHealth.CurrentHealth = data.Player.Health;
         playerMagic.CurrentCharges = data.Player.Mana;
 

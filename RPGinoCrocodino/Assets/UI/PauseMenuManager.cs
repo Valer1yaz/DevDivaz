@@ -82,9 +82,6 @@ public class PauseMenuManager : MonoBehaviour
         var player = FindObjectOfType<PlayerController>();
         SaveSystemManager.Instance.SaveGame(player);
 
-        // После сохранения включаем игрока обратно, если нужно
-        if (playerController != null)
-            playerController.enabled = true;
 
         Debug.Log("Игра сохранена");
     }
@@ -96,13 +93,11 @@ public class PauseMenuManager : MonoBehaviour
             playerController.enabled = false;
 
         // Вызов системы загрузки
-        PlayerController player = FindObjectOfType<PlayerController>();
+        PlayerController player = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+        Debug.Log("Перед восстановлением позиции: " + player.transform.position);
         SaveSystemManager.Instance.LoadGame(player);
-
-        // После загрузки включаем игрока
-        if (playerController != null)
-            playerController.enabled = true;
-
+        
+        Debug.Log("После восстановления позиции: " + player.transform.position);
         Debug.Log("Игра загружена");
     }
 }

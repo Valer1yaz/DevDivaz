@@ -12,7 +12,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform cameraTransform;
 
     private CharacterController controller;
-    private Vector2 inputDirection;
     private Vector3 moveDirection;
     private bool isRunning;
     private float verticalVelocity;

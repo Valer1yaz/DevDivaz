@@ -1652,7 +1652,7 @@ GameObject:
   - component: {fileID: 2923559730897256617}
   - component: {fileID: -668557403545439049}
   m_Layer: 6
-  m_Name: EnemyRanged
+  m_Name: EnemyTypeA
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1704,6 +1704,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxCharges: 5
   rechargeTime: 5
+  currentCharges: 0
 --- !u!114 &2695760291449547580
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1721,9 +1722,15 @@ MonoBehaviour:
   attackRange: 2
   attackCooldown: 2
   damage: 10
-  projectilePrefab: {fileID: 0}
+  deathEffect: {fileID: 6855314210357232282, guid: 7c2a9b83b809a0848915fabd9596b68b, type: 3}
+  projectilePrefab: {fileID: 5099504310651994328, guid: e9ca9a7b7cdb5594395dd79999832a5f, type: 3}
   projectileSpawnPoint: {fileID: 4022360000594803215}
   projectileSpeed: 10
+  castEffect: {fileID: 1652143759095011288, guid: e2c1ac940434a5242b54d72b66654687, type: 3}
+  meleeDamageRadius: 1.5
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &4689972507242024371
 Animator:
   serializedVersion: 5

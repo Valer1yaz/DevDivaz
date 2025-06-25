@@ -27,26 +27,36 @@ public class EnemyFleeState : IEnemyState
         float hpPercent = health.currentHP / health.maxHP;
         float distance = Vector3.Distance(enemyAI.transform.position, enemyAI.PlayerTransform.position);
         
-            if (hpPercent > 0.3f)
+        if (hpPercent > 0.3f)
         {
             // Если здоровье выше 30%, возвращаемся в Idle или другое состояние
             stateMachine.ChangeState(new EnemyIdleState(enemyAI, stateMachine));
         }
         else
         {
-            enemyAI.Retreat();
-            if (distance >= 5f && distance <= 20f)
+            if (enemyAI.isBoss)
             {
-                enemyAI.animator.SetBool("IsMoving", false);
-            }
-            else if (distance < 5f)
-            {
-                enemyAI.Retreat();
+                //enemyAI.PerformStrongAttack();
+                //return;
+                stateMachine.ChangeState(new EnemyStrongAttackState(enemyAI, stateMachine));
             }
             else
             {
-                stateMachine.ChangeState(new EnemyIdleState(enemyAI, stateMachine));
+                enemyAI.Retreat();
+                if (distance >= 5f && distance <= 20f)
+                {
+                    enemyAI.animator.SetBool("IsMoving", false);
+                }
+                else if (distance < 5f)
+                {
+                    enemyAI.Retreat();
+                }
+                else
+                {
+                    stateMachine.ChangeState(new EnemyIdleState(enemyAI, stateMachine));
+                }
             }
+                
         }
     }   
 

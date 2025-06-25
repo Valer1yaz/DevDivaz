@@ -30,13 +30,8 @@ public class EnemyAI : MonoBehaviour
     [HideInInspector] public Transform PlayerTransform;
     [HideInInspector] public float CooldownTimer;
 
-    // Для босса
-    //public BossAI Boss { get; set; }
-    public bool IsAttacked { get; private set; } = false;
-
     private Health health;
     public Animator animator { get; private set; }
-
     private EnemyStateMachine stateMachine;
     private bool isDead = false;
 
@@ -46,9 +41,9 @@ public class EnemyAI : MonoBehaviour
         animator = GetComponent<Animator>();
         health = GetComponent<Health>();
 
+        if (GetComponent<EnemyStateMachine>() == null)
+            gameObject.AddComponent<EnemyStateMachine>();
         stateMachine = GetComponent<EnemyStateMachine>();
-        if (stateMachine == null)
-            stateMachine = gameObject.AddComponent<EnemyStateMachine>();
 
         stateMachine.ChangeState(new EnemyIdleState(this, stateMachine));
     }
@@ -97,7 +92,8 @@ public class EnemyAI : MonoBehaviour
     {
         if (castEffect != null) castEffect.Play();
         yield return new WaitForSeconds(1f);
-        GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, Quaternion.LookRotation(PlayerTransform.position - projectileSpawnPoint.position));
+        GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position,
+            Quaternion.LookRotation(PlayerTransform.position - projectileSpawnPoint.position));
         Projectile projScript = projectile.GetComponent<Projectile>();
         projScript.Initialize(damage, DamageType.Magic, projectileSpeed, PlayerTransform.position + Vector3.up * 1f);
         Destroy(projectile, 5f);
@@ -110,9 +106,23 @@ public class EnemyAI : MonoBehaviour
         Destroy(gameObject, 3f);
     }
 
-    // Метод для реакции на удар
+    // Реакция на удар
     public void OnAttacked()
     {
-
+        var sm = GetComponent<EnemyStateMachine>();
+        if (sm != null && isBoss)
+        {
+            sm.ChangeState(new EnemyAggroState(this, sm));
+        }
     }
+
+    // Метод для запуска сильной атаки
+    /*public void PerformStrongAttack()
+    {
+        var sm = GetComponent<EnemyStateMachine>();
+        if (sm != null)
+        {
+            sm.ChangeState(new EnemyStrongAttackState(this, sm));
+        }
+    }*/
 }

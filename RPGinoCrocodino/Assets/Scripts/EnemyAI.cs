@@ -7,6 +7,7 @@ public class EnemyAI : MonoBehaviour
 {
     public EnemyType enemyType;
     public bool isBoss = false; // Установите в инспекторе для босса
+    private bool isPeaceful = false; // Внутренняя переменная для режима
     public float moveSpeed = 3f;
     public float attackRange = 2f;
     public float attackCooldown = 2f;
@@ -25,7 +26,6 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Behavior Settings")]
     public float AggroRange = 10f; // радиус агрессии
-    public bool IsPeaceful = false; // режим мирности
 
     [HideInInspector] public Transform PlayerTransform;
     [HideInInspector] public float CooldownTimer;
@@ -52,6 +52,18 @@ public class EnemyAI : MonoBehaviour
     {
         if (isDead || health.IsDead) return;
         stateMachine.Update();
+    }
+
+    // Метод для установки режима
+    public void SetPeacefulMode(bool isPeaceful)
+    {
+        this.isPeaceful = isPeaceful;
+    }
+
+    // Внутренний метод для проверки режима
+    public bool IsPeaceful()
+    {
+        return isPeaceful;
     }
 
     public void ChasePlayer()
@@ -109,20 +121,13 @@ public class EnemyAI : MonoBehaviour
     // Реакция на удар
     public void OnAttacked()
     {
-        var sm = GetComponent<EnemyStateMachine>();
-        if (sm != null && isBoss)
-        {
-            sm.ChangeState(new EnemyAggroState(this, sm));
-        }
-    }
 
-    // Метод для запуска сильной атаки
-    /*public void PerformStrongAttack()
-    {
-        var sm = GetComponent<EnemyStateMachine>();
-        if (sm != null)
+        if (isBoss)
         {
-            sm.ChangeState(new EnemyStrongAttackState(this, sm));
+            Debug.Log("Босс получил удар, отключаю мирность");
+            SetPeacefulMode(false); // отключить режим мирности только у босса
         }
-    }*/
+        stateMachine.ChangeState(new EnemyAggroState(this, stateMachine));
+
+    }
 }

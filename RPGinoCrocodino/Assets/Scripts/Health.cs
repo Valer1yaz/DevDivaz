@@ -52,6 +52,12 @@ public class Health : MonoBehaviour
             }
         }
 
+        var enemyAI = GetComponent<EnemyAI>();
+        if (enemyAI != null && enemyAI.isBoss && enemyAI.IsPeaceful())
+        {
+            enemyAI.OnAttacked();
+        }
+
         // Отбрасывание (для игрока и мобов)
         Vector3 knockbackDirection = -transform.forward * knockbackForce;
         transform.position += knockbackDirection;

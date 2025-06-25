@@ -23,7 +23,7 @@ public class EnemyAttackState : IEnemyState
 
     public void Execute()
     {
-        if (enemyAI.IsPeaceful)
+        if (enemyAI.IsPeaceful())
         {
             stateMachine.ChangeState(new EnemyIdleState(enemyAI, stateMachine));
             return;

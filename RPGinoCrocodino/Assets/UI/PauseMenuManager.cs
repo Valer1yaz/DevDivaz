@@ -9,15 +9,18 @@ public class PauseMenuManager : MonoBehaviour
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Button saveButton;
     [SerializeField] private Button loadButton;
+    [SerializeField] private Toggle togglePeacefulModeButton;
     [SerializeField] private PlayerController playerController;
 
     private bool isPaused = false;
+    public static bool IsPeacefulModeActive = false;
 
     private void Start()
     {
         mainMenuButton.onClick.AddListener(ReturnToMainMenu);
         saveButton.onClick.AddListener(SaveGame);
         loadButton.onClick.AddListener(LoadGame);
+        togglePeacefulModeButton.onValueChanged.AddListener(TogglePeacefulMode);
 
         // Изначально меню скрыто
         pauseMenu.SetActive(false);
@@ -99,5 +102,21 @@ public class PauseMenuManager : MonoBehaviour
         
         Debug.Log("После восстановления позиции: " + player.transform.position);
         Debug.Log("Игра загружена");
+    }
+
+    public void TogglePeacefulMode(bool isOn)
+    {
+        IsPeacefulModeActive = isOn;
+        Debug.Log("Мирный режим: " + IsPeacefulModeActive);
+        UpdateEnemyPeacefulMode(IsPeacefulModeActive);
+    }
+
+    private void UpdateEnemyPeacefulMode(bool isPeaceful)
+    {
+        EnemyAI[] enemies = FindObjectsOfType<EnemyAI>();
+        foreach (EnemyAI enemy in enemies)
+        {
+            enemy.SetPeacefulMode(isPeaceful);
+        }
     }
 }

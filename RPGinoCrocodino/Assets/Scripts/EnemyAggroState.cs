@@ -21,7 +21,7 @@ public class EnemyAggroState : IEnemyState
 
     public void Execute()
     {
-        if (enemyAI.IsPeaceful)
+        if (enemyAI.IsPeaceful())
         {
             stateMachine.ChangeState(new EnemyIdleState(enemyAI, stateMachine));
             return;

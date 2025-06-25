@@ -4,7 +4,7 @@ public enum DamageType { Physical, Magic }
 
 public class Health : MonoBehaviour
 {
-    [SerializeField] public float maxHP = 100;
+    [SerializeField] public float maxHP;
     [SerializeField] public float currentHP;
     [SerializeField] private float knockbackForce = 2f;
 

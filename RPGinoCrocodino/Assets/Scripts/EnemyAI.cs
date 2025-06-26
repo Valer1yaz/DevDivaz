@@ -34,6 +34,7 @@ public class EnemyAI : MonoBehaviour
     public Animator animator { get; private set; }
     private EnemyStateMachine stateMachine;
     private bool isDead = false;
+    
 
     private void Start()
     {
@@ -111,10 +112,15 @@ public class EnemyAI : MonoBehaviour
         Destroy(projectile, 5f);
     }
 
+    
+
     public void OnDeath()
     {
         isDead = true;
+     
+        
         if (deathEffect != null) deathEffect.Play();
+
         Destroy(gameObject, 3f);
     }
 

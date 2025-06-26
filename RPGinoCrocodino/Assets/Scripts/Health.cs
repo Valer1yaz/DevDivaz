@@ -13,6 +13,8 @@ public class Health : MonoBehaviour
 
     private Animator animator;
 
+    private EnemySpawnManager spawnManager;
+
     private void Start()
     {
         currentHP = maxHP;
@@ -65,9 +67,15 @@ public class Health : MonoBehaviour
         if (currentHP <= 0) Die();
     }
 
+    public void SetSpawnManager(EnemySpawnManager manager)
+    {
+        spawnManager = manager;
+    }
+
     private void Die()
     {
         IsDead = true; // Устанавливаем флаг смерти
+        
         if (animator != null)
         {
             animator.SetTrigger("Die");
@@ -79,12 +87,17 @@ public class Health : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject, 3f);
+            if (spawnManager != null)
+            {
+                spawnManager.EnemyKilled(gameObject);
+                Debug.Log("Враг убит и уведомлен менеджер");
+            }
+            else
+            {
+                Debug.LogWarning("spawnManager не назначен");
+            }
+            Destroy(gameObject, 0.3f);
         }
     }
 
-    public void Heal(float amount)
-    {
-        currentHP = Mathf.Min(currentHP + amount, maxHP);
-    }
 }

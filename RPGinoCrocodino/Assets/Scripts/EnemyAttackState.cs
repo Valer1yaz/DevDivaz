@@ -40,7 +40,7 @@ public class EnemyAttackState : IEnemyState
 
             if (hpPercent > 0.3f)
             {
-                enemyAI.Attack();
+                enemyAI.PerformNormalAttackEffects();
             }
             else
             {
@@ -51,7 +51,7 @@ public class EnemyAttackState : IEnemyState
 
     public void Exit()
     {
-        // Можно сбрасывать триггеры, если нужно
+        
         //enemyAI.animator.ResetTrigger("Attack");
     }
 }

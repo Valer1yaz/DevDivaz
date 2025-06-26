@@ -25,7 +25,7 @@ public class EnemyAI : MonoBehaviour
     public LayerMask playerLayer;
 
     [Header("Behavior Settings")]
-    public float AggroRange = 10f; // радиус агрессии
+    public float AggroRange = 10f; 
 
     [HideInInspector] public Transform PlayerTransform;
     [HideInInspector] public float CooldownTimer;
@@ -34,7 +34,13 @@ public class EnemyAI : MonoBehaviour
     public Animator animator { get; private set; }
     private EnemyStateMachine stateMachine;
     private bool isDead = false;
-    
+
+    public GameObject[] strongAttackEffects;
+    public GameObject[] normalAttackEffects; 
+
+
+    // Звук для сильной атаки
+    public AudioSource strongAttackSound;
 
     private void Start()
     {
@@ -112,7 +118,36 @@ public class EnemyAI : MonoBehaviour
         Destroy(projectile, 5f);
     }
 
-    
+    public void PerformStrongAttackEffects()
+    {
+        if (isBoss)
+        {
+            // Воспроизводим эффекты
+            if (strongAttackEffects.Length > 0)
+            {
+                int index = Random.Range(0, strongAttackEffects.Length);
+                Instantiate(strongAttackEffects[index], transform.position + Vector3.up, Quaternion.identity);
+            }
+            if (strongAttackSound != null)
+            {
+                strongAttackSound.Play();
+            }
+        }
+        Attack();
+    }
+
+    public void PerformNormalAttackEffects()
+    {
+        if (isBoss)
+        {
+            if (normalAttackEffects.Length > 0)
+            {
+                int index = Random.Range(0, normalAttackEffects.Length);
+                Instantiate(normalAttackEffects[index], transform.position + Vector3.up, Quaternion.identity);
+            }
+        }
+        Attack();
+    }
 
     public void OnDeath()
     {
@@ -131,7 +166,7 @@ public class EnemyAI : MonoBehaviour
         if (isBoss)
         {
             Debug.Log("Босс получил удар, отключаю мирность");
-            SetPeacefulMode(false); // отключить режим мирности только у босса
+            SetPeacefulMode(false); 
         }
         stateMachine.ChangeState(new EnemyAggroState(this, stateMachine));
 

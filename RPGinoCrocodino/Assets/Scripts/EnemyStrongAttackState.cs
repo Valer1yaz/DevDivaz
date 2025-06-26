@@ -14,13 +14,13 @@ public class EnemyStrongAttackState : IEnemyState
     {
         enemyAI.animator.SetTrigger("StrongAttack");
         enemyAI.animator.ResetTrigger("Attack");
-        enemyAI.CooldownTimer = 0f;
+        enemyAI.CooldownTimer = 2f;
     }
 
     public void Execute()
     {
         float distance = Vector3.Distance(enemyAI.transform.position, enemyAI.PlayerTransform.position);
-        enemyAI.Attack();
+        enemyAI.PerformStrongAttackEffects();
         // После атаки решаем, что делать дальше
         if (distance > enemyAI.attackRange)
         {
@@ -28,13 +28,12 @@ public class EnemyStrongAttackState : IEnemyState
         }
         else
         {
-            enemyAI.Attack();
+            enemyAI.PerformNormalAttackEffects();
         }
     }
 
     public void Exit()
     {
-        // Можно сбросить триггер, если нужно
-        // enemyAI.animator.ResetTrigger("StrongAttack");
+        //enemyAI.animator.ResetTrigger("StrongAttack");
     }
 }

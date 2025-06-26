@@ -12,8 +12,9 @@ public class EnemySpawnManager : MonoBehaviour
 
     [Header("Параметры спавна")]
     public int maxEnemiesOnMap = 6;           
-    public float spawnInterval = 30f;          
+    public float spawnInterval = 30f;
 
+    public GameManager gameManager;
     private int killedEnemiesCount = 0;       
 
 
@@ -63,6 +64,11 @@ public class EnemySpawnManager : MonoBehaviour
     public void EnemyKilled(GameObject enemy)
     {
         killedEnemiesCount++;
-        Debug.Log("Врагов убито: " + killedEnemiesCount);
+        
+        if (gameManager != null)
+        {
+            Debug.Log("Врагов убито: " + killedEnemiesCount);
+            gameManager.AddScore();
+        }
     }
 }

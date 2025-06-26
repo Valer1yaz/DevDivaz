@@ -25,7 +25,7 @@ public class EnemyAI : MonoBehaviour
     public LayerMask playerLayer;
 
     [Header("Behavior Settings")]
-    public float AggroRange = 10f; 
+    public float AggroRange = 10f;
 
     [HideInInspector] public Transform PlayerTransform;
     [HideInInspector] public float CooldownTimer;
@@ -35,12 +35,12 @@ public class EnemyAI : MonoBehaviour
     private EnemyStateMachine stateMachine;
     private bool isDead = false;
 
-    public GameObject[] strongAttackEffects;
-    public GameObject[] normalAttackEffects; 
+    public GameObject[] strongAttackEffects; // Эффекты для сильной атаки (2 эффекта)
+    public GameObject[] normalAttackEffects; // Эффекты для обычной атаки (2 эффекта)
 
+    public AudioSource strongAttackSound; // Звук для сильной атаки
 
-    // Звук для сильной атаки
-    public AudioSource strongAttackSound;
+    private bool effectsPlayed = false; // Флаг для контроля запуска эффектов за один вызов
 
     private void Start()
     {
@@ -118,12 +118,26 @@ public class EnemyAI : MonoBehaviour
         Destroy(projectile, 5f);
     }
 
-    public void PerformStrongAttackEffects()
+    // Вызов эффектов для обычной атаки (проигрываются один раз)
+    public void TriggerNormalAttackEffects()
     {
         if (isBoss)
         {
-            // Воспроизводим эффекты
-            if (strongAttackEffects.Length > 0)
+            if (normalAttackEffects != null && normalAttackEffects.Length > 0)
+            {
+                int index = Random.Range(0, normalAttackEffects.Length);
+                Instantiate(normalAttackEffects[index], transform.position + Vector3.up, Quaternion.identity);
+            }
+        }
+        effectsPlayed = true;
+    }
+
+    // Вызов эффектов для сильной атаки (проигрываются один раз)
+    public void TriggerStrongAttackEffects()
+    {
+        if (isBoss)
+        {
+            if (strongAttackEffects != null && strongAttackEffects.Length > 0)
             {
                 int index = Random.Range(0, strongAttackEffects.Length);
                 Instantiate(strongAttackEffects[index], transform.position + Vector3.up, Quaternion.identity);
@@ -133,42 +147,31 @@ public class EnemyAI : MonoBehaviour
                 strongAttackSound.Play();
             }
         }
-        Attack();
+        effectsPlayed = true;
     }
 
-    public void PerformNormalAttackEffects()
+    // Сбросить флаг, чтобы эффекты можно было запускать снова при следующей атаке
+    public void ResetEffectsFlag()
     {
-        if (isBoss)
-        {
-            if (normalAttackEffects.Length > 0)
-            {
-                int index = Random.Range(0, normalAttackEffects.Length);
-                Instantiate(normalAttackEffects[index], transform.position + Vector3.up, Quaternion.identity);
-            }
-        }
-        Attack();
+        effectsPlayed = false;
     }
 
     public void OnDeath()
     {
         isDead = true;
-     
-        
         if (deathEffect != null) deathEffect.Play();
-
         Destroy(gameObject, 3f);
     }
 
     // Реакция на удар
     public void OnAttacked()
     {
-
         if (isBoss)
         {
             Debug.Log("Босс получил удар, отключаю мирность");
-            SetPeacefulMode(false); 
+            SetPeacefulMode(false);
         }
-        stateMachine.ChangeState(new EnemyAggroState(this, stateMachine));
-
+        if (stateMachine != null)
+            stateMachine.ChangeState(new EnemyAggroState(this, stateMachine));
     }
 }

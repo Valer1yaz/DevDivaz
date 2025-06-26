@@ -16,9 +16,13 @@ public class EnemyAttackState : IEnemyState
 
     public void Enter()
     {
-        health = enemyAI.gameObject.GetComponent<Health>();
+        health = enemyAI.GetComponent<Health>();
         enemyAI.animator.SetTrigger("Attack");
         enemyAI.CooldownTimer = 0f;
+
+        // Проигрываем эффекты один раз при начале атаки
+        enemyAI.ResetEffectsFlag();
+        enemyAI.TriggerNormalAttackEffects();
     }
 
     public void Execute()
@@ -38,13 +42,13 @@ public class EnemyAttackState : IEnemyState
         {
             float hpPercent = health.currentHP / health.maxHP;
 
-            if (hpPercent > 0.3f)
+            if (hpPercent < 0.3f)
             {
-                enemyAI.PerformNormalAttackEffects();
+                stateMachine.ChangeState(new EnemyFleeState(enemyAI, stateMachine));
             }
             else
             {
-                stateMachine.ChangeState(new EnemyFleeState(enemyAI, stateMachine));
+                enemyAI.Attack();
             }
         }
     }
@@ -52,6 +56,5 @@ public class EnemyAttackState : IEnemyState
     public void Exit()
     {
         
-        //enemyAI.animator.ResetTrigger("Attack");
     }
 }

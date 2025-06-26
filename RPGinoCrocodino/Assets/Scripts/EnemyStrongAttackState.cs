@@ -13,27 +13,28 @@ public class EnemyStrongAttackState : IEnemyState
     public void Enter()
     {
         enemyAI.animator.SetTrigger("StrongAttack");
-        enemyAI.animator.ResetTrigger("Attack");
-        enemyAI.CooldownTimer = 2f;
+        enemyAI.CooldownTimer = 0f;
+
+        // Проигрываем сильные эффекты один раз
+        enemyAI.ResetEffectsFlag();
+        enemyAI.TriggerStrongAttackEffects();
     }
 
     public void Execute()
     {
         float distance = Vector3.Distance(enemyAI.transform.position, enemyAI.PlayerTransform.position);
-        enemyAI.PerformStrongAttackEffects();
-        // После атаки решаем, что делать дальше
         if (distance > enemyAI.attackRange)
         {
             stateMachine.ChangeState(new EnemyAggroState(enemyAI, stateMachine));
         }
         else
         {
-            enemyAI.PerformNormalAttackEffects();
+            enemyAI.Attack(); // вызывается у босса, чтобы применить урон
         }
     }
 
     public void Exit()
     {
-        //enemyAI.animator.ResetTrigger("StrongAttack");
+        // ничего не делаем
     }
 }
